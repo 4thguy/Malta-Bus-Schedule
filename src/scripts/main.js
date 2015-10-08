@@ -82,14 +82,19 @@ var seasons = [
 	'winter'
 ];
 var days = [
+	'sunday',
 	'monday',
 	'tuesday',
 	'wednesday',
 	'thursday',
 	'friday',
 	'saturday',
-	'sunday'
 ];
+
+var today = {
+	season: 'winter',
+	dayOfWeek: days[new Date().getDay()]
+}
 
 function initRouteTimes(currentRoute) {
 	var times = currentRoute.data.times;
@@ -123,6 +128,31 @@ function BusRouteViewModel() {
 
 	self.route = currentRoute.data.route;
 	self.times = initRouteTimes(currentRoute);
+
+	self.isRunning = function(data) {
+		var d = new Date();
+		if ((data.day === today.dayOfWeek) && //filter out 1/7 of list
+			(data.season === today.season)) { //filter out 1/2 of list
+			var end = data.end.split(':');
+			if (end[0] >= d.getHours()) {
+				if ((end[0] === d.getHours()) &&
+					(end[1] <= d.getMinutes())) {
+					return true;
+				}
+				var start = data.start.split(':');
+				if (start[0] <= d.getHours()) {
+					if (start[0] === d.getHours()) {
+						if (start[1] >= d.getMinutes()) {
+							return true;
+						}
+						return false;
+					}
+					return true;
+				}
+			}
+		}
+	}
+	return false;
 };
 
 ko.applyBindings(new BusRouteViewModel());
