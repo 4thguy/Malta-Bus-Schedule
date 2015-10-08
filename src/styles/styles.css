@@ -1,0 +1,15 @@
+/*Bower components */
+/*******************/
+@import "bootstrap/dist/css/bootstrap.css";
+
+/*Custom styles*/
+/***************/
+/* Base */
+@import 'base/base.css';
+
+/* Layout */
+@import 'layout/header.css';
+@import 'layout/footer.css';
+
+/* Page */
+@import 'page/landing.css';
