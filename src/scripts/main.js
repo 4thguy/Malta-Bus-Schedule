@@ -109,14 +109,35 @@ function initRouteTimes(currentRoute) {
 			var currentSchedule = template[currentSeason[dayString]];
 			for (var c in currentSchedule) {
 				var currentTime = currentSchedule[c];
-				var a = {
-					day: dayString,
-					season: seasonString,
-					start: currentTime.start,
-					end: currentTime.end,
-					frequency: currentTime.frequency
-				};
-				toReturn.push(a);
+				var tmpEnd = currentTime.end.split(':');
+					tmpEnd[0] = parseInt(tmpEnd[0]);
+					tmpEnd[1] = parseInt(tmpEnd[1]);
+				var tmpStart = currentTime.start.split(':');
+					tmpStart[0] = parseInt(tmpStart[0]);
+					tmpStart[1] = parseInt(tmpStart[1]);
+				var currentHours = 1 - (tmpEnd[1] - tmpStart[1]) / 60;
+				    currentHours += (tmpEnd[0] - tmpStart[0]);
+				var currentFrequency = 60 / currentTime.frequency; //assuming tha busses run at least 1 time per hour
+				var totalTrips = currentHours * currentFrequency;
+				var schedule = [
+					tmpEnd[0] - Math.ceil(currentHours),
+					tmpEnd[1]
+				];
+				for (var t = 0; t < totalTrips; t++) {
+					schedule[1] += currentTime.frequency;
+					if (schedule[1] > 59) {
+						schedule[1] -= 60;
+						schedule[0]++;
+					}
+					var currentDeparture = schedule.join(':');
+					var a = {
+						day: dayString,
+						season: seasonString,
+						departure: currentDeparture,
+						model: currentTime
+					};
+					toReturn.push(a);
+				}
 			}
 		}
 	}
@@ -130,6 +151,7 @@ function BusRouteViewModel() {
 	self.times = initRouteTimes(currentRoute);
 
 	self.isRunning = function(data) {
+		return false; //disable
 		var d = new Date();
 		if ((data.day === today.dayOfWeek) && //filter out 1/7 of list
 			(data.season === today.season)) { //filter out 1/2 of list
