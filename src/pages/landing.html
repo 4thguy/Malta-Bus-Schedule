@@ -24,7 +24,7 @@
 			</tr>
 		</thead>
 		<tbody data-bind="foreach: times">
-			<tr data-bind="css: { 'bg-primary': $parent.isRunning($data) }">
+			<tr data-bind="css: $parent.isRunning($data)">
 				<td data-bind="text: day"></td>
 				<td data-bind="text: season"></td>
 				<td data-bind="text: departure"></td>

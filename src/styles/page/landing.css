@@ -1,0 +1,12 @@
+.bus-next {
+	color: #fff;
+	background-color: #337ab7;
+}
+.bus-scheduled {
+	color: rgb(51, 51, 51);
+    background-color: #dff0d8;
+}
+.bus-departed {
+	color: rgb(51, 51, 51);
+	background-color: #fcf8e3;
+}

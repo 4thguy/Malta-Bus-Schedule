@@ -94,7 +94,7 @@ var days = [
 var today = {
 	season: 'winter',
 	dayOfWeek: days[new Date().getDay()]
-}
+};
 
 function initRouteTimes(currentRoute) {
 	var times = currentRoute.data.times;
@@ -151,30 +151,26 @@ function BusRouteViewModel() {
 	self.times = initRouteTimes(currentRoute);
 
 	self.isRunning = function(data) {
-		return false; //disable
-		var d = new Date();
-		if ((data.day === today.dayOfWeek) && //filter out 1/7 of list
+		if ((data.day === today.dayOfWeek) && //filter out 6/7 of list
 			(data.season === today.season)) { //filter out 1/2 of list
-			var end = data.end.split(':');
-			if (end[0] >= d.getHours()) {
-				if ((end[0] === d.getHours()) &&
-					(end[1] <= d.getMinutes())) {
-					return true;
+			var now = new Date();
+			now = now.getHours()*60 + now.getMinutes();
+			var departure = data.departure.split(':');
+			departure = parseInt(departure[0]*60) + parseInt(departure[1]);
+			var difference = departure - now;
+			if (difference > 0) {
+				if (difference < data.model.frequency) {
+					return 'bus-next';
+				} else {
+					return 'bus-scheduled';
 				}
-				var start = data.start.split(':');
-				if (start[0] <= d.getHours()) {
-					if (start[0] === d.getHours()) {
-						if (start[1] >= d.getMinutes()) {
-							return true;
-						}
-						return false;
-					}
-					return true;
-				}
+			} else {
+				return 'bus-departed';
 			}
 		}
-	}
+		return 'bus-none';
+	};
 	return false;
-};
+}
 
 ko.applyBindings(new BusRouteViewModel());
