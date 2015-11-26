@@ -144,6 +144,18 @@ function initRouteTimes(currentRoute) {
 	return toReturn;
 }
 
+function filterSchedule(currentSchedule, data) {
+	data.array.removeAll();
+	for (var i in currentSchedule) {
+		if (currentSchedule[i].day === data.day) { //filter out 6/7 of list
+			if (currentSchedule[i].season === data.season) { //filter out 1/2 of list
+				data.array.push(currentSchedule[i]);
+			}
+		}
+	}
+
+}
+
 function BusRouteViewModel() {
 	var self = this;
 	var routeTimes = initRouteTimes(currentRoute);
@@ -155,32 +167,22 @@ function BusRouteViewModel() {
 		self.day(data);
 	};
 
+	var packageDataForSchduleFilter = function() {
+		return {
+			season: self.season()[0] || 'winter',
+			day: self.day(),
+			array: self.times
+		};
+	};
+
 	self.day.subscribe(function() {
-		var season = self.season()[0] || 'winter';
-		var day = self.day();
-		self.times.removeAll();
-		for (var i in routeTimes) {
-			if (routeTimes[i].day === day) {
-				if (routeTimes[i].season === season) {
-					self.times.push(routeTimes[i]);
-				}
-			}
-		}
+		filterSchedule(routeTimes, packageDataForSchduleFilter());
 	});
 
 	self.season = ko.observableArray([]); //winter
 
 	self.season.subscribe(function() {
-		var season = self.season()[0] || 'winter';
-		var day = self.day();
-		self.times.removeAll();
-		for (var i in routeTimes) {
-			if (routeTimes[i].day === day) {
-				if (routeTimes[i].season === season) {
-					self.times.push(routeTimes[i]);
-				}
-			}
-		}
+		filterSchedule(routeTimes, packageDataForSchduleFilter());
 	});
 
 	self.route = currentRoute.data.route;
@@ -206,6 +208,9 @@ function BusRouteViewModel() {
 		}
 		return 'bus-none';
 	};
+
+	filterSchedule(routeTimes, packageDataForSchduleFilter());
+
 	return false;
 }
 
