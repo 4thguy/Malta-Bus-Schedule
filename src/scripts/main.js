@@ -146,9 +146,22 @@ function initRouteTimes(currentRoute) {
 
 function BusRouteViewModel() {
 	var self = this;
+	var routeTimes = initRouteTimes(currentRoute);
+
+	self.season = ko.observableArray([]); //winter
+
+	self.season.subscribe(function(newValue) {
+		var mode = newValue[0] || 'winter';
+		self.times.removeAll();
+		for (var i in routeTimes) {
+			if (routeTimes[i].season === mode) {
+				self.times.push(routeTimes[i]);
+			}
+		}
+	});
 
 	self.route = currentRoute.data.route;
-	self.times = initRouteTimes(currentRoute);
+	self.times = ko.observableArray([]);
 
 	self.isRunning = function(data) {
 		if ((data.day === today.dayOfWeek) && //filter out 6/7 of list
