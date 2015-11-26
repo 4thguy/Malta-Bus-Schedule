@@ -148,14 +148,37 @@ function BusRouteViewModel() {
 	var self = this;
 	var routeTimes = initRouteTimes(currentRoute);
 
-	self.season = ko.observableArray([]); //winter
+	self.day = ko.observable(today.dayOfWeek);
+	self.days = days;
 
-	self.season.subscribe(function(newValue) {
-		var mode = newValue[0] || 'winter';
+	self.changeDay = function(data) {
+		self.day(data);
+	};
+
+	self.day.subscribe(function() {
+		var season = self.season()[0] || 'winter';
+		var day = self.day();
 		self.times.removeAll();
 		for (var i in routeTimes) {
-			if (routeTimes[i].season === mode) {
-				self.times.push(routeTimes[i]);
+			if (routeTimes[i].day === day) {
+				if (routeTimes[i].season === season) {
+					self.times.push(routeTimes[i]);
+				}
+			}
+		}
+	});
+
+	self.season = ko.observableArray([]); //winter
+
+	self.season.subscribe(function() {
+		var season = self.season()[0] || 'winter';
+		var day = self.day();
+		self.times.removeAll();
+		for (var i in routeTimes) {
+			if (routeTimes[i].day === day) {
+				if (routeTimes[i].season === season) {
+					self.times.push(routeTimes[i]);
+				}
 			}
 		}
 	});
