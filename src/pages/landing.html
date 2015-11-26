@@ -15,10 +15,13 @@
 			</tr>
 		</tbody>
 	</table>
-	<input type="checkbox" value="summer" data-bind="checked: season">
 	<div class="row">
-		<div class="col-sm-3 col-md-2" data-bind="foreach: days">
-			<button class="btn btn-lg btn-block btn-default" data-bind="{ text: $data, click: $parent.changeDay, css: { 'btn-primary': $data === $parent.day() } }"></button>
+		<div class="col-sm-3 col-md-2">
+			<label for="season">Summer</label>
+			<input type="checkbox" id="season" value="summer" data-bind="checked: season">
+			<div class="buttons" data-bind="foreach: days">
+				<button class="btn btn-lg btn-block btn-default" data-bind="{ text: $data, click: $parent.changeDay, css: { 'btn-primary': $data === $parent.day() } }"></button>
+			</div>
 		</div>
 		<div class="col-sm-9 col-md-10">
 			<table class="table">
