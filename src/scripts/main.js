@@ -1,81 +1,6 @@
 'use strict';
 
-var currentRoute = {
-	mt: {
-		title: 'ROTTA ĠDIDA',
-		desc: 'Iż-żona ta’ Santa Margerita fil-Mosta issa se jkollha konnessjoni diretta għal Birkirkara u għall-Belt.'
-	},
-	en: {
-		title: 'A NEW ROUTE',
-		desc: 'Santa Margerita in Mosta will have a direct link for Birkirkara and Valletta.'
-	},
-	data: {
-		route: [{
-			location: 'Il-Mosta',
-			area: 'Santa Margerita'
-		},{
-			location: 'Il-Mosta',
-			area: 'Ċentru'
-		},{
-			location: 'Il-Mosta',
-			area: 'Technopark'
-		},{
-			location: 'Ħal-Lija',
-			area: 'Roundabout'
-		},{
-			location: 'Birkirkara',
-			area: 'Psila Street'
-		},{
-			location: 'Santa Venera',
-			area: 'Ferrovija'
-		},{
-			location: 'Il-Pieta\'',
-			area: 'G\'Mangia'
-		},{
-			location: 'Il-Ħamrun',
-			area: 'Mile End'
-		},{
-			location: 'Valletta',
-			area: ''
-		}],
-		times: {
-			template: {
-				type1: [{
-					start: '5:20',
-					end: '7:50',
-					frequency: 30
-				},{
-					start: '7:51',
-					end: '22:15',
-					frequency: 60
-				}],
-				type2: [{
-					start: '5:30',
-					end: '22:30',
-					frequency: 60
-				}]
-			},
-			summer: {
-				monday: 'type1',
-				tuesday: 'type1',
-				wednesday: 'type1',
-				thursday: 'type1',
-				friday: 'type1',
-				saturday: 'type2',
-				sunday: 'type2'
-			},
-			winter: {
-				monday: 'type1',
-				tuesday: 'type1',
-				wednesday: 'type1',
-				thursday: 'type1',
-				friday: 'type1',
-				saturday: 'type2',
-				sunday: 'type2'
-			}
-		}
-	}
-};
+var currentRoute = routes[47];
 
 var seasons = [
 	'summer',
@@ -146,46 +71,61 @@ function initRouteTimes(currentRoute) {
 	return toReturn;
 }
 
-function filterSchedule(currentSchedule, data) {
-	data.times.removeAll();
-	var selectedDay = currentSchedule[data.season][data.day];
-	for (var i in selectedDay) {
-		data.times.push(selectedDay[i]);
+function changeRoute(routeData, newRoute) {
+	var currentRoute = routes[newRoute];
+	var route = currentRoute.data.route;
+	routeData.title(currentRoute.en.title);
+	routeData.desc(currentRoute.en.desc);
+	routeData.currentSchedule = initRouteTimes(currentRoute);
+	routeData.route.removeAll();
+	for (var i in route) {
+		routeData.route.push(route[i]);
 	}
-	return data;
+	return filterSchedule(routeData);
+}
+
+function filterSchedule(routeData) {
+	routeData.times.removeAll();
+	var season = routeData.season()[0] || 'winter';
+	var selectedDay = routeData.currentSchedule[season][routeData.day()];
+	for (var i in selectedDay) {
+		routeData.times.push(selectedDay[i]);
+	}
+	return routeData;
 }
 
 function BusRouteViewModel() {
 	var self = this;
-	var routeTimes = initRouteTimes(currentRoute);
 
-	self.day = ko.observable(today.dayOfWeek);
+	self.routeData = {
+		currentSchedule: {}, //data reference
+		title: ko.observable(''),
+		desc: ko.observable(''),
+		route: ko.observableArray([]), //route, automatic
+		times: ko.observableArray([]), //route times, automatic
+		routeId: ko.observable(''), //route id, user editable
+		day: ko.observable(today.dayOfWeek), //today, user editable
+		season: ko.observableArray([]), //winter, user editable
+	};
+
 	self.days = days;
 
-	self.changeDay = function(data) {
-		self.day(data);
+	self.changeDay = function(newDay) {
+		self.routeData.day(newDay);
 	};
 
-	var packageDataForSchduleFilter = function() {
-		return {
-			season: self.season()[0] || 'winter',
-			day: self.day(),
-			times: self.times
-		};
-	};
-
-	self.day.subscribe(function() {
-		filterSchedule(routeTimes, packageDataForSchduleFilter());
+	self.routeData.routeId.subscribe(function(newRoute) {
+		changeRoute(self.routeData, newRoute);
 	});
 
-	self.season = ko.observableArray([]); //winter
-
-	self.season.subscribe(function() {
-		filterSchedule(routeTimes, packageDataForSchduleFilter());
+	self.routeData.day.subscribe(function() {
+		filterSchedule(self.routeData);
+	});
+	self.routeData.season.subscribe(function() {
+		filterSchedule(self.routeData);
 	});
 
 	self.route = currentRoute.data.route;
-	self.times = ko.observableArray([]);
 
 	self.isRunning = function(data) {
 		if ((data.day === today.dayOfWeek) && //filter out 6/7 of list
@@ -208,9 +148,10 @@ function BusRouteViewModel() {
 		return 'bus-none';
 	};
 
-	filterSchedule(routeTimes, packageDataForSchduleFilter());
+	self.routeData.routeId('47');
 
 	return false;
 }
 
-ko.applyBindings(new BusRouteViewModel());
+var busRouteViewModel = new BusRouteViewModel();
+ko.applyBindings(busRouteViewModel);

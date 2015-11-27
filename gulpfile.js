@@ -98,7 +98,7 @@ var scriptsSrc = [
 	'bower_components/bootstrap/dist/js/bootstrap.min.js',
 	'bower_components/knockout/dist/knockout.js',
 	/* Custom  */
-	paths.scripts.src + 'main.js'
+	paths.scripts.src + '*.js'
 ];
 
 gulp.task('scripts', function () {
