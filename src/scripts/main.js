@@ -99,14 +99,16 @@ var today = {
 function initRouteTimes(currentRoute) {
 	var times = currentRoute.data.times;
 	var template = times.template;
-	var toReturn = [];
+	var toReturn = {};
 
 	for (var s in seasons) {
 		var seasonString = seasons[s];
 		var currentSeason = times[seasonString];
+		toReturn[seasonString] = {};
 		for (var d in days) {
 			var dayString = days[d];
 			var currentSchedule = template[currentSeason[dayString]];
+			toReturn[seasonString][dayString] = [];
 			for (var c in currentSchedule) {
 				var currentTime = currentSchedule[c];
 				var tmpEnd = currentTime.end.split(':');
@@ -136,7 +138,7 @@ function initRouteTimes(currentRoute) {
 						departure: currentDeparture,
 						model: currentTime
 					};
-					toReturn.push(a);
+					toReturn[seasonString][dayString].push(a);
 				}
 			}
 		}
@@ -145,15 +147,12 @@ function initRouteTimes(currentRoute) {
 }
 
 function filterSchedule(currentSchedule, data) {
-	data.array.removeAll();
-	for (var i in currentSchedule) {
-		if (currentSchedule[i].day === data.day) { //filter out 6/7 of list
-			if (currentSchedule[i].season === data.season) { //filter out 1/2 of list
-				data.array.push(currentSchedule[i]);
-			}
-		}
+	data.times.removeAll();
+	var selectedDay = currentSchedule[data.season][data.day];
+	for (var i in selectedDay) {
+		data.times.push(selectedDay[i]);
 	}
-
+	return data;
 }
 
 function BusRouteViewModel() {
@@ -171,7 +170,7 @@ function BusRouteViewModel() {
 		return {
 			season: self.season()[0] || 'winter',
 			day: self.day(),
-			array: self.times
+			times: self.times
 		};
 	};
 
