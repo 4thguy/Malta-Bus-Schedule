@@ -94,6 +94,27 @@ function filterSchedule(routeData) {
 	return routeData;
 }
 
+function scheduleStatus(data) {
+	if ((data.day === today.dayOfWeek) && //filter out 6/7 of list
+		(data.season === today.season)) { //filter out 1/2 of list
+		var now = new Date();
+		now = now.getHours()*60 + now.getMinutes();
+		var departure = data.departure.split(':');
+		departure = parseInt(departure[0]*60) + parseInt(departure[1]);
+		var difference = departure - now;
+		if (difference > 0) {
+			if (difference < data.model.frequency) {
+				return 'next';
+			} else {
+				return 'scheduled';
+			}
+		} else {
+			return 'departed';
+		}
+	}
+	return 'none';
+}
+
 function BusRouteViewModel() {
 	var self = this;
 
@@ -113,40 +134,19 @@ function BusRouteViewModel() {
 	self.changeDay = function(newDay) {
 		self.routeData.day(newDay);
 	};
+	self.isRunning = function(data) {
+		return 'bus-' + scheduleStatus(data);
+	};
 
 	self.routeData.routeId.subscribe(function(newRoute) {
 		changeRoute(self.routeData, newRoute);
 	});
-
 	self.routeData.day.subscribe(function() {
 		filterSchedule(self.routeData);
 	});
 	self.routeData.season.subscribe(function() {
 		filterSchedule(self.routeData);
 	});
-
-	self.route = currentRoute.data.route;
-
-	self.isRunning = function(data) {
-		if ((data.day === today.dayOfWeek) && //filter out 6/7 of list
-			(data.season === today.season)) { //filter out 1/2 of list
-			var now = new Date();
-			now = now.getHours()*60 + now.getMinutes();
-			var departure = data.departure.split(':');
-			departure = parseInt(departure[0]*60) + parseInt(departure[1]);
-			var difference = departure - now;
-			if (difference > 0) {
-				if (difference < data.model.frequency) {
-					return 'bus-next';
-				} else {
-					return 'bus-scheduled';
-				}
-			} else {
-				return 'bus-departed';
-			}
-		}
-		return 'bus-none';
-	};
 
 	self.routeData.routeId('47');
 
